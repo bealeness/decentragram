@@ -23,6 +23,14 @@ contract Decentragram {
     address payable author
   );
 
+  event ImageTipped (
+    uint id,
+    string hashcode,
+    string description,
+    uint tipAmount,
+    address payable author
+  );
+
   //create images
   function uploadImages(string memory _ImgHash, string memory _description) public {
 
@@ -46,4 +54,30 @@ contract Decentragram {
   }
 
   //tip images
+
+  function tipImageOwner(uint _id) public payable {
+
+    //make sure the id is valid
+    require(_id > 0 && _id <= imageCount);
+
+    //fetch the image
+    Image memory _image = images[_id];
+
+    //fetch the author
+    address payable _author = _image.author;
+
+    //tip the author
+    address(_author).transfer(msg.value);
+
+    //increment the tip amount stored in struct
+    _image.tipAmount = _image.tipAmount + msg.value;
+
+    //update the image, put back into the struct
+    images[_id] = _image;
+
+    //trigger an event
+    emit ImageTipped(_id, _image.hashcode, _image.description, _image.tipAmount, _author);
+    
+  }
+
 }
